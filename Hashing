@@ -1,0 +1,206 @@
+// store and retrieve data in o(1)
+// CHAINING(OPEN hASHING)
+/* use of linkedlist */
+// insert delete O(1) searching O(n)
+// extra space use
+// load factor denoted by alpha
+// total elements / total slots
+
+/*
+LINEAR PROBING (close hashing )
+k mod 10
+(H(k)+i )mod 10
+ADVANTAGES
+i ---> collision number, probe number
+ii ----> no extra space used
+DISADVANTAGES
+i--> search O(N); Deletion difficult
+ii--> Primary clustering
+group of elements bn jatai hain
+kisi particular location pr probability of element zaida ho jai gi
+
+iii--> Secondary clustering
+2 or more elements are competing for same probe sequence
+
+quadratic probing
+(H(k)+i^2 )mod 10
+primary clustering solved
+
+DISADVANTAGE
+location nhi milti loop mai chla jata no guarantee of finding aa slot
+sec. clustering
+search O(n)
+*/
+
+#include <iostream>
+using namespace std;
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+#define SIZE 10 // Define the size of the hash table
+
+struct HashItem
+{
+    // int key;
+    int value;
+};
+
+class HashMap
+{
+    HashItem *arr;
+    int capacity;
+    int currentElements;
+    float load_factor;
+    void doubleCapacity()
+    {
+        capacity *= 2;
+        // rehashes
+        HashItem *arr2;
+        arr2 = new HashItem[capacity];
+        for (int i = 0; i < capacity; i++)
+        {
+            arr2[i].value = 0;
+        }
+        for (int i = 0; i < capacity; i++)
+        {
+            arr2[i].value = arr[i].value;
+        }
+        for (int i = 0; i < capacity; i++)
+        {
+            arr[i].value = 0;
+        }
+        for (int i = 0; i < capacity; i++)
+        {
+            int y = arr2[i].value;
+            insert(y);
+        }
+    }
+
+public:
+    HashMap()
+    {
+        cout << "hi";
+        capacity = 10;
+        arr = new HashItem[capacity];
+        currentElements = 0;
+        for (int i = 0; i < capacity; i++)
+        {
+            arr[i].value = 0;
+        }
+    }
+    HashMap(int const c)
+    {
+        capacity = c;
+        if (c > 1)
+        {
+            arr = new HashItem[c];
+        }
+        else
+        {
+            cout << "Capacity should be greater than 1" << endl;
+        }
+        for (int i = 0; i < capacity; i++)
+        {
+            arr[i].value = 0;
+        }
+    }
+
+    int index(int key)
+    {
+        int i = key % capacity;
+        return i;
+    }
+    int emptyslot()
+    {
+        for (int i = 0; i < currentElements; i++)
+        {
+            if (arr[i].value == 0)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    int getNextCandidateIndex(int key, int i)
+    { // for linear probing
+        int x = index(key);
+        x = x + i;
+
+        return x;
+    }
+
+    int getNextCandidateIndexQuad(int key, int i)
+    { // for quadratic probing
+        int x = index(key);
+       x = x + i+i;
+        return x;
+    }
+    void insert(int const key)
+    {
+        load_factor = currentElements / capacity;
+        if (load_factor == 0.75)
+        {
+            doubleCapacity();
+        }
+        int x = index(key);
+        int i = 1;
+        while (x < capacity && arr[x].value != 0)
+        {
+            {
+                x = getNextCandidateIndex(key, i);
+
+                i = i + 1;
+            }
+        }
+        if (x >= capacity)
+        {
+            // function to find the empty space fromm beginning
+            x = emptyslot();
+        }
+        if (arr[x].value == 0)
+        {
+            arr[x].value = key;
+        }
+        currentElements++;
+    }
+
+    void Print()
+    {
+        for (int i = 0; i < capacity; i++)
+            cout << arr[i].value << " ";
+    }
+    bool deleteKey(int const key) const
+    {
+        bool x = false;
+         for (int i = 0; i < capacity; i++)
+        {
+            if (arr[i].value == key)
+            {
+
+                arr[i].value = 0;
+
+                x = true;
+            }
+        }
+        // if (x == true)
+        // {
+        //     currentElements--;
+        // }
+        return x;
+    }
+  
+    ~HashMap(){
+        
+        delete []arr;
+    }
+};
+int main()
+{
+    HashMap b(4);
+    b.insert(4);
+    b.insert(10);
+    b.insert(11);
+    b.insert(35);
+    b.deleteKey(4);
+    b.Print();
+}
